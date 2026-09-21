@@ -1,0 +1,15 @@
+[project]
+name = "me-ubicas"
+version = "1.0.0"
+description = "Juego de adivina quién para dos personas en el mismo móvil"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["flet[all]>=1.0.0"]
+
+[tool.flet]
+org = "com.meubicas"
+product = "Me Ubicas"
+company = "Me Ubicas"
+
+[tool.flet.app]
+path = "src"
