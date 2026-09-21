@@ -882,7 +882,7 @@ class MeUbicasApp:
                                 expand=True,
                                 controls=[
                                     ft.Text(
-                                        "Acertaste" if hit else "Te equivocaste",
+                                        "Acertaste" if hit else "No acertaste",
                                         color=SUCCESS if hit else DANGER,
                                         weight=ft.FontWeight.BOLD,
                                         size=16,
@@ -1069,30 +1069,54 @@ class MeUbicasApp:
             return
         options = [
             ft.Button(
-                content=value.name,
-                expand=True,
-                bgcolor="#F3F6F9",
-                color=NAVY,
+                content=ft.Text(value.name, color=WHITE, weight=ft.FontWeight.W_700),
+                bgcolor=GOLD,
+                color=WHITE,
                 style=ft.ButtonStyle(
-                    shape=ft.RoundedRectangleBorder(radius=12),
-                    side=ft.BorderSide(1, "#D5DEE8"),
+                    padding=ft.Padding.symmetric(horizontal=14, vertical=10),
+                    shape=ft.RoundedRectangleBorder(radius=20),
                 ),
                 on_click=lambda e, val=value: self._ask_value(classification, val),
             )
             for value in values
         ]
-        self._alert(
-            title="¿Qué deseas consultar?",
-            message=f"Vas a preguntar por {classification.name.lower()}. Esta pregunta se gasta y no podrás repetir el mismo elemento.",
-            tone="warning",
-            confirm_label=None,
-            extra=ft.Column(
-                tight=True,
-                spacing=8,
-                scroll=ft.ScrollMode.AUTO,
-                height=min(280, 52 * len(options)),
-                controls=options,
-            ),
+        self.page.show_dialog(
+            ft.AlertDialog(
+                modal=True,
+                bgcolor=WHITE,
+                shape=ft.RoundedRectangleBorder(radius=18),
+                icon=ft.Icon(
+                    CLASS_ICONS.get(classification.slug, ft.Icons.HELP),
+                    color=GOLD,
+                    size=36,
+                ),
+                title=ft.Text(
+                    f'Elige lo que deseas preguntar sobre "{classification.name}"',
+                    color=NAVY,
+                    weight=ft.FontWeight.W_700,
+                    size=16,
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                content=ft.Row(
+                    wrap=True,
+                    spacing=8,
+                    run_spacing=8,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=options,
+                ),
+                actions=[
+                    ft.Button(
+                        content="Cancelar",
+                        bgcolor=WHITE,
+                        color=NAVY,
+                        style=ft.ButtonStyle(
+                            side=ft.BorderSide(1, "#C5D0DC"),
+                            shape=ft.RoundedRectangleBorder(radius=12),
+                        ),
+                        on_click=self.close_dialog,
+                    )
+                ],
+            )
         )
 
     def _ask_value(self, classification: Classification, value: ClassificationValue) -> None:
@@ -1118,13 +1142,44 @@ class MeUbicasApp:
             return
         self.close_dialog()
         hit = result.has_trait
-        self._alert(
-            title="Acertaste" if hit else "Te equivocaste",
-            message=result.message,
-            tone="success" if hit else "danger",
-            confirm_label="Entendido",
-            on_confirm=lambda e: self._after_answer(),
-            cancel_label=None,
+        self.page.show_dialog(
+            ft.AlertDialog(
+                modal=True,
+                bgcolor=WHITE,
+                shape=ft.RoundedRectangleBorder(radius=18),
+                title=ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=8,
+                    controls=[
+                        ft.Icon(
+                            ft.Icons.CHECK_CIRCLE if hit else ft.Icons.CANCEL,
+                            color=SUCCESS if hit else DANGER,
+                            size=28,
+                        ),
+                        ft.Text(
+                            "Acertaste" if hit else "No acertaste",
+                            color=SUCCESS if hit else DANGER,
+                            weight=ft.FontWeight.BOLD,
+                            size=18,
+                        ),
+                    ],
+                ),
+                content=ft.Text(
+                    result.message,
+                    size=15,
+                    color=NAVY,
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                actions_alignment=ft.MainAxisAlignment.CENTER,
+                actions=[
+                    ft.Button(
+                        content="Entendido",
+                        bgcolor=GOLD,
+                        color=WHITE,
+                        on_click=lambda e: self._after_answer(),
+                    )
+                ],
+            )
         )
 
     def _after_answer(self) -> None:
